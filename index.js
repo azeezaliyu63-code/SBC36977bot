@@ -1,5 +1,4 @@
 const TelegramBot = require('node-telegram-bot-api');
-const axios = require('axios');
 const dotenv = require('dotenv');
 
 // Load environment variables
@@ -16,16 +15,14 @@ if (!token) {
 
 // Create bot instance with polling
 const bot = new TelegramBot(token, { 
-    polling: true,
-    // Remove webhook if it exists
-    webHook: false
+    polling: true
 });
 
 // Channel link
 const CHANNEL_LINK = 'https://t.me/Sport_HUB_football';
 const CHANNEL_USERNAME = '@Sport_HUB_football';
 
-// Bot commands and responses
+// Bot commands
 
 // Start command
 bot.onText(/\/start/, (msg) => {
@@ -77,7 +74,7 @@ Here are all available commands:
 /fixtures - Upcoming fixtures
 /livescores - Live scores
 /tips - Betting tips
-/channel - Join our Telegram channel
+/channel - Join our community
 
 💬 *Need support?* 
 Join our channel: ${CHANNEL_LINK}
@@ -317,14 +314,12 @@ bot.onText(/\/tips/, async (msg) => {
     }
 });
 
-// Handle any other messages
+// Handle unknown commands
 bot.on('message', (msg) => {
     const chatId = msg.chat.id;
     const text = msg.text;
     
-    // Ignore commands that we've already handled
     if (text && text.startsWith('/')) {
-        // Check if it's a valid command
         const validCommands = ['/start', '/help', '/odds', '/predictions', '/fixtures', '/livescores', '/tips', '/channel'];
         if (!validCommands.includes(text)) {
             bot.sendMessage(chatId, 
@@ -332,7 +327,6 @@ bot.on('message', (msg) => {
             );
         }
     } else if (text) {
-        // For non-command messages, redirect to channel
         bot.sendMessage(chatId, 
             `🤖 *SBC369 Bot*\n\nFor sports updates and betting information, please visit our channel:\n\n${CHANNEL_LINK}\n\nOr use the commands listed in /help`
         , { parse_mode: 'Markdown' });
@@ -349,10 +343,6 @@ bot.on('polling_error', (error) => {
             bot.startPolling();
         }, 5000);
     }
-});
-
-bot.on('webhook_error', (error) => {
-    console.error('Webhook error:', error);
 });
 
 // Handle process termination
