@@ -9,12 +9,17 @@ dotenv.config();
 const token = process.env.BOT_TOKEN;
 
 if (!token) {
-    console.error('BOT_TOKEN is not defined in environment variables');
+    console.error('❌ BOT_TOKEN is not defined in environment variables');
+    console.error('Please set BOT_TOKEN in Railway environment variables');
     process.exit(1);
 }
 
-// Create bot instance
-const bot = new TelegramBot(token, { polling: true });
+// Create bot instance with polling
+const bot = new TelegramBot(token, { 
+    polling: true,
+    // Remove webhook if it exists
+    webHook: false
+});
 
 // Channel link
 const CHANNEL_LINK = 'https://t.me/Sport_HUB_football';
@@ -66,13 +71,13 @@ bot.onText(/\/help/, (msg) => {
 Here are all available commands:
 
 /start - Welcome message
+/help - Show all commands
 /odds - Current betting odds
 /predictions - Match predictions
 /fixtures - Upcoming fixtures
 /livescores - Live scores
 /tips - Betting tips
 /channel - Join our Telegram channel
-/help - Show this help message
 
 💬 *Need support?* 
 Join our channel: ${CHANNEL_LINK}
@@ -104,12 +109,9 @@ Channel: ${CHANNEL_USERNAME}
 bot.onText(/\/odds/, async (msg) => {
     const chatId = msg.chat.id;
     
-    // Send typing indicator
     bot.sendChatAction(chatId, 'typing');
     
     try {
-        // This is where you would fetch real odds from an API
-        // For now, sending sample data
         const oddsMessage = `
 📊 *Current Betting Odds*
 
@@ -339,11 +341,31 @@ bot.on('message', (msg) => {
 
 // Error handling
 bot.on('polling_error', (error) => {
-    console.error('Polling error:', error);
+    console.error('Polling error:', error.code);
+    if (error.code === 'EFATAL' || error.code === 'ETIMEOUT') {
+        console.log('Restarting polling...');
+        bot.stopPolling();
+        setTimeout(() => {
+            bot.startPolling();
+        }, 5000);
+    }
 });
 
 bot.on('webhook_error', (error) => {
     console.error('Webhook error:', error);
+});
+
+// Handle process termination
+process.on('SIGINT', () => {
+    console.log('Bot stopping...');
+    bot.stopPolling();
+    process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+    console.log('Bot stopping...');
+    bot.stopPolling();
+    process.exit(0);
 });
 
 console.log('🤖 SBC369 Bot is running...');
