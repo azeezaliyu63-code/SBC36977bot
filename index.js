@@ -1,28 +1,18 @@
 const TelegramBot = require('node-telegram-bot-api');
 const dotenv = require('dotenv');
 
-// Load environment variables
 dotenv.config();
 
-// Bot token from environment variable
 const token = process.env.BOT_TOKEN;
 
 if (!token) {
-    console.error('❌ BOT_TOKEN is not defined in environment variables');
-    console.error('Please set BOT_TOKEN in Railway environment variables');
+    console.error('❌ BOT_TOKEN is not defined');
     process.exit(1);
 }
 
-// Create bot instance with polling
-const bot = new TelegramBot(token, { 
-    polling: true
-});
-
-// Channel link
+const bot = new TelegramBot(token, { polling: true });
 const CHANNEL_LINK = 'https://t.me/Sport_HUB_football';
 const CHANNEL_USERNAME = '@Sport_HUB_football';
-
-// Bot commands
 
 // Start command
 bot.onText(/\/start/, (msg) => {
@@ -105,7 +95,6 @@ Channel: ${CHANNEL_USERNAME}
 // Odds command
 bot.onText(/\/odds/, async (msg) => {
     const chatId = msg.chat.id;
-    
     bot.sendChatAction(chatId, 'typing');
     
     try {
@@ -136,15 +125,13 @@ bot.onText(/\/odds/, async (msg) => {
         
         bot.sendMessage(chatId, oddsMessage, { parse_mode: 'Markdown' });
     } catch (error) {
-        console.error('Error fetching odds:', error);
-        bot.sendMessage(chatId, '❌ Sorry, unable to fetch odds at the moment. Please try again later.');
+        bot.sendMessage(chatId, '❌ Sorry, unable to fetch odds at the moment.');
     }
 });
 
 // Predictions command
 bot.onText(/\/predictions/, async (msg) => {
     const chatId = msg.chat.id;
-    
     bot.sendChatAction(chatId, 'typing');
     
     try {
@@ -182,15 +169,13 @@ bot.onText(/\/predictions/, async (msg) => {
         
         bot.sendMessage(chatId, predictionsMessage, { parse_mode: 'Markdown' });
     } catch (error) {
-        console.error('Error fetching predictions:', error);
-        bot.sendMessage(chatId, '❌ Unable to fetch predictions. Please try again later.');
+        bot.sendMessage(chatId, '❌ Unable to fetch predictions.');
     }
 });
 
 // Fixtures command
 bot.onText(/\/fixtures/, async (msg) => {
     const chatId = msg.chat.id;
-    
     bot.sendChatAction(chatId, 'typing');
     
     try {
@@ -222,15 +207,13 @@ bot.onText(/\/fixtures/, async (msg) => {
         
         bot.sendMessage(chatId, fixturesMessage, { parse_mode: 'Markdown' });
     } catch (error) {
-        console.error('Error fetching fixtures:', error);
-        bot.sendMessage(chatId, '❌ Unable to fetch fixtures. Please try again later.');
+        bot.sendMessage(chatId, '❌ Unable to fetch fixtures.');
     }
 });
 
 // Live scores command
 bot.onText(/\/livescores/, async (msg) => {
     const chatId = msg.chat.id;
-    
     bot.sendChatAction(chatId, 'typing');
     
     try {
@@ -264,15 +247,13 @@ bot.onText(/\/livescores/, async (msg) => {
         
         bot.sendMessage(chatId, liveScoresMessage, { parse_mode: 'Markdown' });
     } catch (error) {
-        console.error('Error fetching live scores:', error);
-        bot.sendMessage(chatId, '❌ Unable to fetch live scores. Please try again later.');
+        bot.sendMessage(chatId, '❌ Unable to fetch live scores.');
     }
 });
 
 // Tips command
 bot.onText(/\/tips/, async (msg) => {
     const chatId = msg.chat.id;
-    
     bot.sendChatAction(chatId, 'typing');
     
     try {
@@ -309,8 +290,7 @@ bot.onText(/\/tips/, async (msg) => {
         
         bot.sendMessage(chatId, tipsMessage, { parse_mode: 'Markdown' });
     } catch (error) {
-        console.error('Error fetching tips:', error);
-        bot.sendMessage(chatId, '❌ Unable to fetch tips. Please try again later.');
+        bot.sendMessage(chatId, '❌ Unable to fetch tips.');
     }
 });
 
@@ -336,26 +316,6 @@ bot.on('message', (msg) => {
 // Error handling
 bot.on('polling_error', (error) => {
     console.error('Polling error:', error.code);
-    if (error.code === 'EFATAL' || error.code === 'ETIMEOUT') {
-        console.log('Restarting polling...');
-        bot.stopPolling();
-        setTimeout(() => {
-            bot.startPolling();
-        }, 5000);
-    }
-});
-
-// Handle process termination
-process.on('SIGINT', () => {
-    console.log('Bot stopping...');
-    bot.stopPolling();
-    process.exit(0);
-});
-
-process.on('SIGTERM', () => {
-    console.log('Bot stopping...');
-    bot.stopPolling();
-    process.exit(0);
 });
 
 console.log('🤖 SBC369 Bot is running...');
